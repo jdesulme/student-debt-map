@@ -93,14 +93,11 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
-#map_canvas  {
+html, body, #map_canvas {
     margin: 0;
+    padding: 0;
     height: 100%;
 }
-
-
-
-
 
 
 
