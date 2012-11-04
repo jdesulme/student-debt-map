@@ -158,8 +158,10 @@ $(function() {
         max: 7,
         step: 1,
         slide: function( event, ui ) {
+            var slideYear = timearr[ui.value];
             sliderLabels.find('li.active').removeClass('active');
-            sliderLabels.find('li#'+timearr[ui.value]).addClass('active');
+            sliderLabels.find('li#'+slideYear).addClass('active');
+            createNationCharts(map,slideYear);
         }
     });
 });
