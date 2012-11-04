@@ -8,9 +8,11 @@ google.load('visualization', '1', { packages: ['corechart'] });
 function initialize() {
 
     map = new google.maps.Map(document.getElementById('map_canvas'), {
-        center   :new google.maps.LatLng(40.4230, -98.7372),
-        zoom     :4,
-        mapTypeId:google.maps.MapTypeId.ROADMAP
+        center: new google.maps.LatLng(38, -97),
+        zoom: 5,
+        streetViewControl: false,
+        mapTypeControl: false,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
     });
 
     map.setOptions({
@@ -39,6 +41,7 @@ function initialize() {
         ]
     });
 
+    createNationCharts(map,year);
 
     // Initialize State Level Layer
     layer = new google.maps.FusionTablesLayer({
@@ -88,6 +91,7 @@ function initialize() {
 
             // Removes Private Institutions layer
             update_layer(null);
+            updateLegend('State Ranking of Student Debt');
             
         }
     });
@@ -177,6 +181,13 @@ var LAYER_STYLES = {
     }
 };
 
+function createNationCharts(map, year){
+    var nationCharts = document.getElementById('nationCharts');
+    nationCharts.index = 1;
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(nationCharts);
+    drawNationVisualization(year);
+}
+
 /**
  *
  * @param map
@@ -255,6 +266,46 @@ function drawVisualization(state) {
             }
         }
     });
+}
 
+function drawNationVisualization(year) {
+    google.visualization.drawChart({
+        containerId: "nation_debt_avg",
+        dataSourceUrl: "http://www.google.com/fusiontables/gvizdata?tq=",
+        query: "SELECT Type,'Average debt of graduates' " +
+            "FROM 1UX8wPKCTz4bvqgsbPi3zalm28UxMLmL183nONoo WHERE Year = '" + year + "'",
+        chartType: "ColumnChart",
+        options: {
+            title: 'Nation - Average debt of graduates ' + year,
+            height: 200,
+            width: 200,
+            legend: {
+                position: 'none'
+            },
+            vAxis: {
+                format:'$#'
+            }
+        }
+    });
+
+    google.visualization.drawChart({
+        containerId: "nation_debt_percent",
+        dataSourceUrl: "http://www.google.com/fusiontables/gvizdata?tq=",
+        query: "SELECT Type,'Percent of graduates with debt' " +
+            "FROM 1UX8wPKCTz4bvqgsbPi3zalm28UxMLmL183nONoo WHERE Year = '" + year + "'",
+        chartType: "ColumnChart",
+        options: {
+            title: 'Nation - Proportion of graduating seniors with debt ' + year,
+            height: 200,
+            width: 200,
+            legend: {
+                position: 'none'
+            },
+            vAxis: {
+                format:'#%'
+            }
+        }
+    });
 
 }
+
