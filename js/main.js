@@ -13,6 +13,33 @@ function initialize() {
         mapTypeId:google.maps.MapTypeId.ROADMAP
     });
 
+    map.setOptions({
+        styles: [
+            {
+                stylers: [
+                    { saturation: -100 }
+                ]
+            },{
+                featureType: "road",
+                stylers: [
+                    { visibility: "off" }
+                ]
+            },{
+                featureType: "poi",
+                stylers: [
+                    { visibility: "off" }
+                ]
+            },{
+                featureType: "water",
+                elementType: "labels",
+                stylers: [
+                    { visibility: "off" }
+                ]
+            }
+        ]
+    });
+
+
     // Initialize State Level Layer
     layer = new google.maps.FusionTablesLayer({
         query: {
