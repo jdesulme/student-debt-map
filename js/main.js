@@ -1,8 +1,9 @@
 var map,
     layer,
-    layer_2;
-var year = '2010-11';
+    layer_2,
+    year = '2010-11';
 
+google.load('visualization', '1', { packages: ['corechart'] });
 
 function initialize() {
 
@@ -28,6 +29,13 @@ function initialize() {
 
     layer_2.setMap(map);
 
+    createLegend(map, 'State Ranking of Student Debt');
+
+    google.maps.event.addListener(layer, 'click', function(e) {
+        var state = e.row.id.value;
+        drawVisualization(state);
+    });
+
     // Check if User has changed the zoom level
     google.maps.event.addListener(map, 'zoom_changed', function(){
 
@@ -42,6 +50,8 @@ function initialize() {
 
             // Add Private Institutions  to layer 2
             update_layer('private');
+
+            updateLegend();
 
 
         } else if (zoomLevel < statezoom){
@@ -121,3 +131,103 @@ $(function() {
     });
     $( "#current_year" ).val( " " );
 });
+
+/**
+ * Stores the styles for all the states
+ * @type {Object}
+ */
+var LAYER_STYLES = {
+    'State Ranking of Student Debt': {
+        'min': 0,
+        'max': 50,
+        'colors': [
+            '#045a8d',
+            '#2b8cbe',
+            '#a6bddb',
+            '#a6bddb',
+            '#d0d1e6'
+        ]
+    }
+};
+
+/**
+ *
+ * @param map
+ * @param sector
+ */
+function createLegend(map, sector) {
+    var legendWrapper = document.createElement('div');
+    legendWrapper.id = 'legendWrapper';
+    legendWrapper.index = 1;
+    map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legendWrapper);
+    legendStateContent(legendWrapper, sector);
+}
+
+function legendStateContent(legendWrapper, sector) {
+    var legend = document.createElement('div');
+    legend.id = 'legend';
+
+    var title = document.createElement('p');
+    title.innerHTML = sector;
+    legend.appendChild(title);
+
+    var layerStyle = LAYER_STYLES[sector];
+    var colors = layerStyle.colors;
+    var minNum = layerStyle.min;
+    var maxNum = layerStyle.max;
+    var step = (maxNum - minNum) / colors.length;
+
+    for (var i = 0; i < colors.length; i++) {
+        var legendItem = document.createElement('div');
+
+        var color = document.createElement('div');
+        color.setAttribute('class', 'color');
+        color.style.backgroundColor = colors[i];
+        legendItem.appendChild(color);
+
+        var newMin = minNum + step * i;
+        var newMax = newMin + step;
+        var minMax = document.createElement('span');
+        minMax.innerHTML = newMin + ' - ' + newMax;
+        legendItem.appendChild(minMax);
+
+        legend.appendChild(legendItem);
+    }
+
+    legendWrapper.appendChild(legend);
+}
+
+function updateLegend(sector) {
+    var legendWrapper = document.getElementById('legendWrapper');
+    var legend = document.getElementById('legend');
+    legendWrapper.removeChild(legend);
+
+    if (sector) {
+        legendStateContent(legendWrapper, sector);
+    }
+}
+
+/**
+ * Generates the bar charts for the selected state
+ * @param state
+ */
+function drawVisualization(state) {
+    google.visualization.drawChart({
+        containerId: "debt_percent",
+        dataSourceUrl: "http://www.google.com/fusiontables/gvizdata?tq=",
+        query: "SELECT '2003-04','2004-05','2005-06','2006-07','2007-08','2008-09','2009-10','2010-11' " +
+            "FROM 1eppwUeL-UhwEQSmjparfT13a_G0yZZirYBw-F80 WHERE ST = '" + state + "'",
+        chartType: "BarChart",
+        options: {
+            title: 'Percent of students that graduate with debt - ' + state,
+            vAxis: {
+                title: 'Year'
+            },
+            hAxis: {
+                title: 'Percentage'
+            }
+        }
+    });
+
+
+}
