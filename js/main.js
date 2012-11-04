@@ -2,6 +2,7 @@ var map,
     layer,
     layer_2;
 var year = '2010-11';
+var data_year = '2010-11';
 
 
 function initialize() {
@@ -67,6 +68,7 @@ function update_layer(type){
                     select: 'longitude',
                     from: '1RMj6bytivb9T1EvGcGWHrPw8rWv8Ze3UVdIOZUE',
                     where: "Year = " + year
+                    where: "Year = '" + data_year + "'"
                 }
 
             });
@@ -78,6 +80,7 @@ function update_layer(type){
                     select: 'longitude',
                     from: '16k0RPYOl7XRRaXOEL710C1HDXW3q6cfSk01gInY',
                     where: "Year = " + year
+                    where: "Year = '" + data_year + "'"
                 }
 
             });
