@@ -1,7 +1,6 @@
-var map,layer, layer_2,
-    state_layer,
-    public_layer,
-    private_layer;
+var map,
+    layer,
+    layer_2;
 var year = '2010-11';
 
 
@@ -14,7 +13,6 @@ function initialize() {
     });
 
     // Initialize State Level Layer
-    //get_layer('state',null);
     layer = new google.maps.FusionTablesLayer({
         query: {
             select: 'geometry',
@@ -30,6 +28,7 @@ function initialize() {
 
     layer_2.setMap(map);
 
+    // Check if User has changed the zoom level
     google.maps.event.addListener(map, 'zoom_changed', function(){
 
         var statezoom = 6;
@@ -39,52 +38,31 @@ function initialize() {
         if (zoomLevel >= statezoom) {
 
             // Add Public Institutions to layer
-            layer.setOptions({
-                query: {
-                    select: 'longitude',
-                    from: '1RMj6bytivb9T1EvGcGWHrPw8rWv8Ze3UVdIOZUE',
-                    where: "Year = " + year
-                }
-            });
+            update_layer('public');
 
             // Add Private Institutions  to layer 2
-            layer_2.setOptions({
-                query: {
-                    select: 'longitude',
-                    from: '16k0RPYOl7XRRaXOEL710C1HDXW3q6cfSk01gInY',
-                    where: "Year = " + year
-                }
-            });
+            update_layer('private');
 
 
         } else if (zoomLevel < statezoom){
 
             // Re-Display State Layer AND Remove Public Institution Layer
-            layer.setOptions({
-                query: {
-                    select: 'geometry',
-                    from: '1b-RZu6Cu4xDud8JEKCNEyzPXnnQ0suTk2KGs_Mk'
-                }
-            });
+            update_layer('state');
 
             // Removes Private Institutions layer
-            layer_2.setOptions({
-                query: null
-
-            });
-
+            update_layer(null);
+            
         }
     });
 }
 
 
-// Returns a Map Layer Based on the Type[public / private] and Year - DEPRECATED!!!..... smh
-function get_layer(type,year){
-    //var layer = null;
+// Returns a Map Layer Based on the Type[public / private / state] and Year
+function update_layer(type){
 
     switch (type){
         case 'public': {
-            layer = new google.maps.FusionTablesLayer({
+            layer.setOptions({
                 query: {
                     select: 'longitude',
                     from: '1RMj6bytivb9T1EvGcGWHrPw8rWv8Ze3UVdIOZUE',
@@ -92,11 +70,10 @@ function get_layer(type,year){
                 }
 
             });
-            layer.setMap(map);
             break;
         }
         case 'private': {
-            layer = new google.maps.FusionTablesLayer({
+            layer_2.setOptions({
                 query: {
                     select: 'longitude',
                     from: '16k0RPYOl7XRRaXOEL710C1HDXW3q6cfSk01gInY',
@@ -104,26 +81,29 @@ function get_layer(type,year){
                 }
 
             });
-            layer.setMap(map);
             break;
         }
         case 'state' : {
-            layer = new google.maps.FusionTablesLayer({
+            layer.setOptions({
                 query: {
                     select: 'geometry',
                     from: '1b-RZu6Cu4xDud8JEKCNEyzPXnnQ0suTk2KGs_Mk'
                 }
             });
-            layer.setMap(map);
+            break;
+        }
+        default: {
+            layer_2.setOptions({
+                query: null
+
+            });
             break;
         }
 
 
     }
 
-    //return layer;
-
-} // End get_layer
+} // End update_layer
 
 google.maps.event.addDomListener(window, 'load', initialize);
 
