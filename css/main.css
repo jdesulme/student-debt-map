@@ -167,6 +167,17 @@ h1 {
     margin: auto;
 }
 
+#slider .ui-slider-handle {
+    background: transparent #045A8D no-repeat center top;
+    width: 14px;
+    height: 25px;
+    border-style: none;
+    margin-top: 0px;
+    box-shadow: 1px 1px 2px #999;
+    -webkit-box-shadow: 1px 1px 2px #999;
+    -moz-box-shadow: 1px 1px 2px #999999;
+    cursor: pointer;
+}
 /* ==========================================================================
    Helper classes
    ========================================================================== */
