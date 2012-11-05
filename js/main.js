@@ -1,4 +1,6 @@
-var map,markersArray=[],
+var map,
+    markersArray=[],
+    infoWindow,
     layer,
     layer_2,
     year = '2010-11';
@@ -6,6 +8,8 @@ var map,markersArray=[],
 google.load('visualization', '1', { packages: ['corechart'] });
 
 function initialize() {
+
+    infoWindow = new google.maps.InfoWindow();
 
     map = new google.maps.Map(document.getElementById('map_canvas'), {
         center: new google.maps.LatLng(38, -97),
@@ -76,15 +80,19 @@ function initialize() {
         if (zoomLevel >= statezoom) {
 
             // Add Public Institutions to layer
-            update_layer('public');
+            update_layer('rmstate');
+            setMarkerData('public');
 
             // Add Private Institutions  to layer 2
-            update_layer('private');
+            //update_layer('private');
+            setMarkerData('private');
 
             updateLegend();
 
 
         } else if (zoomLevel < statezoom){
+
+            removeMarkers();
 
             // Re-Display State Layer AND Remove Public Institution Layer
             update_layer('state');
@@ -107,7 +115,7 @@ function update_layer(type){
                 query: {
                     select: 'longitude',
                     from: '1RMj6bytivb9T1EvGcGWHrPw8rWv8Ze3UVdIOZUE',
-                    where: "Year = '" + data_year + "'"
+                    where: "Year = '" + year + "'"
                 }
 
             });
@@ -118,7 +126,7 @@ function update_layer(type){
                 query: {
                     select: 'longitude',
                     from: '16k0RPYOl7XRRaXOEL710C1HDXW3q6cfSk01gInY',
-                    where: "Year = '" + data_year + "'"
+                    where: "Year = '" + year + "'"
                 }
 
             });
@@ -130,6 +138,12 @@ function update_layer(type){
                     select: 'geometry',
                     from: '1b-RZu6Cu4xDud8JEKCNEyzPXnnQ0suTk2KGs_Mk'
                 }
+            });
+            break;
+        }
+        case 'rmstate' : {
+            layer.setOptions({
+                query: null
             });
             break;
         }
@@ -314,7 +328,7 @@ function setMarkerData(type){
     var tableId = (type == 'public') ? "17hyJhTdWctFwnS6wZBZAcFostEd3KPMmBVl9IV8" : "1dQB9NiJJgew8kJb7zMTOMgyL8cOHW2sOI2x6nCc";
 
     var query = "SELECT Name,Year,'Percent of graduates with debt','Average debt of graduates','12-month enrollment - Total (IPEDS)'," +
-        "longitude,latitude,url FROM " + tableId + " WHERE Year ='" + data_year + "'";
+        "longitude,latitude,url FROM " + tableId + " WHERE Year ='" + year + "'";
 
     query = encodeURIComponent(query);
     var gvizQuery = new google.visualization.Query(
