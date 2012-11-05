@@ -182,14 +182,14 @@ $(function() {
         step: 1,
         slide: function( event, ui ) {
             year = timearr[ui.value];
+            sliderLabels.find('li.active').removeClass('active');
+            sliderLabels.find('li#'+year).addClass('active');
+            createNationCharts(map,year);
+
             if(map.getZoom() >= 6) {
                 deleteMarkers();
                 setMarkerData('public');
                 setMarkerData('private');
-            } else {
-                sliderLabels.find('li.active').removeClass('active');
-                sliderLabels.find('li#'+slideYear).addClass('active');
-                createNationCharts(map,year);
             }
         }
     });
