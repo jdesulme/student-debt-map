@@ -21,6 +21,8 @@ textarea {
 body {
     font-size: 1em;
     line-height: 1.4;
+    font-family: 'Sanchez', sans-serif;
+    font-weight: 400;
 }
 
 /*
@@ -92,23 +94,90 @@ textarea {
 /* ==========================================================================
    Author's custom styles
    ========================================================================== */
-
-html, body, #map_canvas {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+h1 {
+    color: #045A8D;
 }
 
+#map_canvas {
+    margin: 0;
+    padding: 0;
+    height: 740px;
+}
 
+#visualization {
+    float: right;
+}
 
+#legend {
+    background: #FFF;
+    margin: 10px;
+    padding: 5px;
+    width: 150px;
+}
 
+#legend p {
+    font-weight: bold;
+    margin-top: 3px;
+}
 
+#legend div {
+    clear: both;
+}
 
+.color {
+    height: 12px;
+    width: 12px;
+    margin-right: 3px;
+    float: left;
+    display: block;
+}
 
+#debt_percent {
+    height: 500;
+    width: 300;
+}
 
+#nationCharts div {
+    float: left;
+}
 
+#header {
+    background: #CCC url("../img/cream_dust.png") repeat center top;
+    position: relative;
+    z-index: 100;
+    height: 150px;
+    padding-top: 50px;
+    box-shadow: 0px 2px 5px #AAA;
+    -webkit-box-shadow: 0px 2px 5px #AAA;
+    -moz-box-shadow: 0px 2px 5px #aaaaaa;
+}
 
+#stateInformation {
+    box-shadow: 0px 2px 5px #AAA;
+    -webkit-box-shadow: 0px 2px 5px #AAA;
+    -moz-box-shadow: 0px 2px 5px #aaaaaa;
+    display: none;
+    background-color: white;
+    z-index: 99;
+    position: relative;
+}
 
+.container {
+    width: 900px;
+    margin: auto;
+}
+
+#slider .ui-slider-handle {
+    background: transparent #045A8D no-repeat center top;
+    width: 14px;
+    height: 25px;
+    border-style: none;
+    margin-top: 0px;
+    box-shadow: 1px 1px 2px #999;
+    -webkit-box-shadow: 1px 1px 2px #999;
+    -moz-box-shadow: 1px 1px 2px #999999;
+    cursor: pointer;
+}
 /* ==========================================================================
    Helper classes
    ========================================================================== */

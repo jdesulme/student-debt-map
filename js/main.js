@@ -1,17 +1,47 @@
-var map,
+var map,markersArray=[],
     layer,
-    layer_2;
-var data_year = '2010-11';
+    layer_2,
+    year = '2010-11';
 
+google.load('visualization', '1', { packages: ['corechart'] });
 
 function initialize() {
 
     map = new google.maps.Map(document.getElementById('map_canvas'), {
-        center   :new google.maps.LatLng(40.4230, -98.7372),
-        zoom     :4,
-        mapTypeId:google.maps.MapTypeId.ROADMAP
-
+        center: new google.maps.LatLng(38, -97),
+        zoom: 5,
+        streetViewControl: false,
+        mapTypeControl: false,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
     });
+
+    map.setOptions({
+        styles: [
+            {
+                stylers: [
+                    { saturation: -100 }
+                ]
+            },{
+                featureType: "road",
+                stylers: [
+                    { visibility: "off" }
+                ]
+            },{
+                featureType: "poi",
+                stylers: [
+                    { visibility: "off" }
+                ]
+            },{
+                featureType: "water",
+                elementType: "labels",
+                stylers: [
+                    { visibility: "off" }
+                ]
+            }
+        ]
+    });
+
+    createNationCharts(map,year);
 
     // Initialize State Level Layer
     layer = new google.maps.FusionTablesLayer({
@@ -29,6 +59,13 @@ function initialize() {
 
     layer_2.setMap(map);
 
+    createLegend(map, 'State Ranking of Student Debt');
+
+    google.maps.event.addListener(layer, 'click', function(e) {
+        var state = e.row.id.value;
+        drawVisualization(state);
+    });
+
     // Check if User has changed the zoom level
     google.maps.event.addListener(map, 'zoom_changed', function(){
 
@@ -44,6 +81,8 @@ function initialize() {
             // Add Private Institutions  to layer 2
             update_layer('private');
 
+            updateLegend();
+
 
         } else if (zoomLevel < statezoom){
 
@@ -52,7 +91,8 @@ function initialize() {
 
             // Removes Private Institutions layer
             update_layer(null);
-
+            updateLegend('State Ranking of Student Debt');
+            
         }
     });
 }
@@ -122,3 +162,204 @@ $(function() {
     });
     $( "#current_year" ).val( " " );
 });
+
+/**
+ * Stores the styles for all the states
+ * @type {Object}
+ */
+var LAYER_STYLES = {
+    'State Ranking of Student Debt': {
+        'min': 0,
+        'max': 50,
+        'colors': [
+            '#045a8d',
+            '#2b8cbe',
+            '#a6bddb',
+            '#a6bddb',
+            '#d0d1e6'
+        ]
+    }
+};
+
+function createNationCharts(map, year){
+    var nationCharts = document.getElementById('nationCharts');
+    nationCharts.index = 1;
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(nationCharts);
+    drawNationVisualization(year);
+}
+
+/**
+ *
+ * @param map
+ * @param sector
+ */
+function createLegend(map, sector) {
+    var legendWrapper = document.createElement('div');
+    legendWrapper.id = 'legendWrapper';
+    legendWrapper.index = 1;
+    map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legendWrapper);
+    legendStateContent(legendWrapper, sector);
+}
+
+function legendStateContent(legendWrapper, sector) {
+    var legend = document.createElement('div');
+    legend.id = 'legend';
+
+    var title = document.createElement('p');
+    title.innerHTML = sector;
+    legend.appendChild(title);
+
+    var layerStyle = LAYER_STYLES[sector];
+    var colors = layerStyle.colors;
+    var minNum = layerStyle.min;
+    var maxNum = layerStyle.max;
+    var step = (maxNum - minNum) / colors.length;
+
+    for (var i = 0; i < colors.length; i++) {
+        var legendItem = document.createElement('div');
+
+        var color = document.createElement('div');
+        color.setAttribute('class', 'color');
+        color.style.backgroundColor = colors[i];
+        legendItem.appendChild(color);
+
+        var newMin = minNum + step * i;
+        var newMax = newMin + step;
+        var minMax = document.createElement('span');
+        minMax.innerHTML = newMin + ' - ' + newMax;
+        legendItem.appendChild(minMax);
+
+        legend.appendChild(legendItem);
+    }
+
+    legendWrapper.appendChild(legend);
+}
+
+function updateLegend(sector) {
+    var legendWrapper = document.getElementById('legendWrapper');
+    var legend = document.getElementById('legend');
+    legendWrapper.removeChild(legend);
+
+    if (sector) {
+        legendStateContent(legendWrapper, sector);
+    }
+}
+
+/**
+ * Generates the bar charts for the selected state
+ * @param state
+ */
+function drawVisualization(state) {
+    google.visualization.drawChart({
+        containerId: "debt_percent",
+        dataSourceUrl: "http://www.google.com/fusiontables/gvizdata?tq=",
+        query: "SELECT '2003-04','2004-05','2005-06','2006-07','2007-08','2008-09','2009-10','2010-11' " +
+            "FROM 1eppwUeL-UhwEQSmjparfT13a_G0yZZirYBw-F80 WHERE ST = '" + state + "'",
+        chartType: "BarChart",
+        options: {
+            title: 'Percent of students that graduate with debt - ' + state,
+            vAxis: {
+                title: 'Year'
+            },
+            hAxis: {
+                title: 'Percentage'
+            }
+        }
+    });
+}
+
+function drawNationVisualization(year) {
+    google.visualization.drawChart({
+        containerId: "nation_debt_avg",
+        dataSourceUrl: "http://www.google.com/fusiontables/gvizdata?tq=",
+        query: "SELECT Type,'Average debt of graduates' " +
+            "FROM 1UX8wPKCTz4bvqgsbPi3zalm28UxMLmL183nONoo WHERE Year = '" + year + "'",
+        chartType: "ColumnChart",
+        options: {
+            title: 'Nation - Average debt of graduates ' + year,
+            height: 200,
+            width: 200,
+            legend: {
+                position: 'none'
+            },
+            vAxis: {
+                format:'$#'
+            }
+        }
+    });
+
+    google.visualization.drawChart({
+        containerId: "nation_debt_percent",
+        dataSourceUrl: "http://www.google.com/fusiontables/gvizdata?tq=",
+        query: "SELECT Type,'Percent of graduates with debt' " +
+            "FROM 1UX8wPKCTz4bvqgsbPi3zalm28UxMLmL183nONoo WHERE Year = '" + year + "'",
+        chartType: "ColumnChart",
+        options: {
+            title: 'Nation - Proportion of graduating seniors with debt ' + year,
+            height: 200,
+            width: 200,
+            legend: {
+                position: 'none'
+            },
+            vAxis: {
+                format:'#%'
+            }
+        }
+    });
+
+}
+
+function setMarkerData(type){
+
+    var tableId = (type == 'public') ? "17hyJhTdWctFwnS6wZBZAcFostEd3KPMmBVl9IV8" : "1dQB9NiJJgew8kJb7zMTOMgyL8cOHW2sOI2x6nCc";
+
+    var query = "SELECT Name,Year,'Percent of graduates with debt','Average debt of graduates','12-month enrollment - Total (IPEDS)'," +
+        "longitude,latitude,url FROM " + tableId + " WHERE Year ='" + data_year + "'";
+
+    query = encodeURIComponent(query);
+    var gvizQuery = new google.visualization.Query(
+        'http://www.google.com/fusiontables/gvizdata?tq=' + query);
+
+    var createMarker = function(coordinate, name, p_year, percent, avg, enrollment, url) {
+        var marker = new google.maps.Marker({
+            map: map,
+            position: coordinate,
+            icon: new google.maps.MarkerImage(url)
+        });
+        google.maps.event.addListener(marker, 'click', function(event) {
+            infoWindow.setPosition(coordinate);
+            infoWindow.setContent(name + '<br>' + p_year );
+            infoWindow.open(map);
+        });
+
+        markersArray.push(marker);
+    };
+
+
+    gvizQuery.send(function(response) {
+        var numRows = response.getDataTable().getNumberOfRows();
+
+        // For each row in the table, create a marker
+        for (var i = 0; i < numRows; i++) {
+            var name = response.getDataTable().getValue(i,0);
+            var curr_year = response.getDataTable().getValue(i,1);
+            var perc = response.getDataTable().getValue(i,2);
+            var avg_debt = response.getDataTable().getValue(i,3);
+            var enroll = response.getDataTable().getValue(i,4);
+            var lng = response.getDataTable().getValue(i,5);
+            var lat = response.getDataTable().getValue(i,6);
+            var url = response.getDataTable().getValue(i,7);
+
+            var coordinate = new google.maps.LatLng(lat, lng);
+
+            createMarker(coordinate, name, curr_year, perc, avg_debt, enroll, url);
+        }
+    });
+}
+
+function removeMarkers() {
+
+    for(ndx in markersArray){
+        markersArray[ndx].setMap(null);
+    }
+}
