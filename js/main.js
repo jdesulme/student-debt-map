@@ -70,6 +70,9 @@ function initialize() {
         drawVisualization(state);
     });
 
+    // Setup markers
+    var count = 0;
+
     // Check if User has changed the zoom level
     google.maps.event.addListener(map, 'zoom_changed', function(){
 
@@ -81,18 +84,24 @@ function initialize() {
 
             // Add Public Institutions to layer
             update_layer('rmstate');
-            setMarkerData('public');
+
+            if(count < 1) {
+                setMarkerData('public');
+                setMarkerData('private');
+                count++;
+            }else
+            showMarkers();
 
             // Add Private Institutions  to layer 2
             //update_layer('private');
-            setMarkerData('private');
+
 
             updateLegend();
 
 
         } else if (zoomLevel < statezoom){
 
-            removeMarkers();
+            clearMarkers();
 
             // Re-Display State Layer AND Remove Public Institution Layer
             update_layer('state');
@@ -172,6 +181,12 @@ $(function() {
         step: 1,
         slide: function( event, ui ) {
             $( "#current_year" ).val( timearr[ui.value] );
+            year = timearr[ui.value];
+            if(map.getZoom() >= 6) {
+                deleteMarkers();
+                setMarkerData('public');
+                setMarkerData('private');
+            }
         }
     });
     $( "#current_year" ).val( " " );
@@ -340,7 +355,7 @@ function setMarkerData(type){
             position: coordinate,
             icon: new google.maps.MarkerImage(url)
         });
-        google.maps.event.addListener(marker, 'click', function(event) {
+        google.maps.event.addListener(marker, 'mouseover', function(event) {
             infoWindow.setPosition(coordinate);
             infoWindow.setContent(name + '<br>' + p_year );
             infoWindow.open(map);
@@ -371,9 +386,27 @@ function setMarkerData(type){
     });
 }
 
-function removeMarkers() {
+function clearMarkers() {
+    if (markersArray) {
+        for(ndx in markersArray){
+            markersArray[ndx].setMap(null);
+        }
+    }
+}
 
-    for(ndx in markersArray){
-        markersArray[ndx].setMap(null);
+function showMarkers() {
+    if (markersArray) {
+        for (i in markersArray) {
+            markersArray[i].setMap(map);
+        }
+    }
+}
+
+function deleteMarkers() {
+    if (markersArray) {
+        for (i in markersArray) {
+            markersArray[i].setMap(null);
+        }
+        markersArray.length = 0;
     }
 }
