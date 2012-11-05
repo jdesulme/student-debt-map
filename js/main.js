@@ -48,12 +48,8 @@ function initialize() {
     createNationCharts(map,year);
 
     // Initialize State Level Layer
-    layer = new google.maps.FusionTablesLayer({
-        query: {
-            select: 'geometry',
-            from: '1b-RZu6Cu4xDud8JEKCNEyzPXnnQ0suTk2KGs_Mk'
-        }
-    });
+    layer = generateLayer(year);
+
     layer.setMap(map);
 
     // Initialize Empty Second Layer to contain Private Schools later
@@ -66,6 +62,7 @@ function initialize() {
     createLegend(map, 'State Ranking of Student Debt');
 
     google.maps.event.addListener(layer, 'click', function(e) {
+        console.dir(e);
         var state = e.row.id.value;
         drawVisualization(state);
     });
@@ -89,7 +86,8 @@ function initialize() {
                 setMarkerData('public');
                 setMarkerData('private');
                 count++;
-            }else
+            }
+            else
             showMarkers();
 
             // Add Private Institutions  to layer 2
@@ -387,6 +385,18 @@ function setMarkerData(type){
             createMarker(coordinate, name, curr_year, perc, avg_debt, enroll, url);
         }
     });
+}
+
+function generateLayer(year){
+    var activeLayer = new google.maps.FusionTablesLayer({
+        query: {
+            select: 'geometry',
+            from: '1b-RZu6Cu4xDud8JEKCNEyzPXnnQ0suTk2KGs_Mk'
+            //where: 'Year = ' + year
+        }
+    });
+
+    return activeLayer;
 }
 
 function clearMarkers() {
