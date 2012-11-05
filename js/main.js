@@ -173,23 +173,26 @@ google.maps.event.addDomListener(window, 'load', initialize);
 
 
 $(function() {
+    var sliderLabels = $('#sliderLabels');
     var timearr = new Array("2003-04","2004-05","2005-06","2006-07","2007-08","2008-09","2009-10","2010-11");
-    $( "#slider" ).slider({
+    $("#slider").slider({
         value:7,
         min: 0,
         max: 7,
         step: 1,
         slide: function( event, ui ) {
-            $( "#current_year" ).val( timearr[ui.value] );
             year = timearr[ui.value];
             if(map.getZoom() >= 6) {
                 deleteMarkers();
                 setMarkerData('public');
                 setMarkerData('private');
+            } else {
+                sliderLabels.find('li.active').removeClass('active');
+                sliderLabels.find('li#'+slideYear).addClass('active');
+                createNationCharts(map,year);
             }
         }
     });
-    $( "#current_year" ).val( " " );
 });
 
 /**
