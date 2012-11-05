@@ -48,7 +48,13 @@ function initialize() {
     createNationCharts(map,year);
 
     // Initialize State Level Layer
-    layer = generateLayer(year);
+    layer = new google.maps.FusionTablesLayer({
+        query: {
+            select: 'geometry',
+            from: '1Msy4KUWg3WxqPhu5ynM8D99ivh5rrqyHGWU4T4o',
+            where: "Year = '" + year + "'"
+        }
+    });
 
     layer.setMap(map);
 
@@ -63,8 +69,8 @@ function initialize() {
 
     google.maps.event.addListener(layer, 'click', function(e) {
         console.dir(e);
-        var state = e.row.id.value;
-        drawVisualization(state);
+       // var state = e.row.id.value;
+       // drawVisualization(state);
     });
 
     // Setup markers
@@ -82,22 +88,19 @@ function initialize() {
             // Add Public Institutions to layer
             update_layer('rmstate');
 
-            if(count < 1) {
+            if (count < 1) {
                 setMarkerData('public');
                 setMarkerData('private');
                 count++;
+            } else {
+                showMarkers();
             }
-            else
-            showMarkers();
 
             // Add Private Institutions  to layer 2
             //update_layer('private');
-
-
             updateLegend();
 
-
-        } else if (zoomLevel < statezoom){
+        } else {
 
             clearMarkers();
 
@@ -143,7 +146,8 @@ function update_layer(type){
             layer.setOptions({
                 query: {
                     select: 'geometry',
-                    from: '1b-RZu6Cu4xDud8JEKCNEyzPXnnQ0suTk2KGs_Mk'
+                    from: '1Msy4KUWg3WxqPhu5ynM8D99ivh5rrqyHGWU4T4o',
+                    where: "Year = '" + year + "'"
                 }
             });
             break;
@@ -161,8 +165,6 @@ function update_layer(type){
             });
             break;
         }
-
-
     }
 
 } // End update_layer
@@ -183,6 +185,9 @@ $(function() {
             sliderLabels.find('li.active').removeClass('active');
             sliderLabels.find('li#'+year).addClass('active');
             createNationCharts(map,year);
+
+            //clear and display the new year's layer
+            layer = update_layer('state');
 
             if(map.getZoom() >= 6) {
                 deleteMarkers();
@@ -387,17 +392,6 @@ function setMarkerData(type){
     });
 }
 
-function generateLayer(year){
-    var activeLayer = new google.maps.FusionTablesLayer({
-        query: {
-            select: 'geometry',
-            from: '1b-RZu6Cu4xDud8JEKCNEyzPXnnQ0suTk2KGs_Mk'
-            //where: 'Year = ' + year
-        }
-    });
-
-    return activeLayer;
-}
 
 function clearMarkers() {
     if (markersArray) {
