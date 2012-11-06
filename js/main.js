@@ -1,4 +1,5 @@
 var map,
+    markercluster,
     markersArray=[],
     infoWindow,
     layer,
@@ -14,6 +15,7 @@ function initialize() {
     map = new google.maps.Map(document.getElementById('map_canvas'), {
         center: new google.maps.LatLng(38, -97),
         zoom: 5,
+        scrollwheel: false,
         streetViewControl: false,
         mapTypeControl: false,
         mapTypeId: google.maps.MapTypeId.ROADMAP
@@ -53,7 +55,8 @@ function initialize() {
             select: 'geometry',
             from: '1Msy4KUWg3WxqPhu5ynM8D99ivh5rrqyHGWU4T4o',
             where: "Year = '" + year + "'"
-        }
+        },
+        suppressInfoWindows:true
     });
 
     layer.setMap(map);
@@ -67,13 +70,17 @@ function initialize() {
 
     createLegend(map, 'State Ranking of Student Debt');
 
+    // Initialize Markers
+    setMarkerData('public');
+    setMarkerData('private');
+
     google.maps.event.addListener(layer, 'click', function(e) {
             var stateList = '';
             var json = e.row;
 
-            var stateDebtAvg = json['Average debt of graduates'].value;
-            var stateDebtPer = json['Percent of graduates with debt'].value;
-            var stateTui = json['Tuition and fees (in-district/in-state)'].value;
+            var stateDebtAvg = '$ ' + json['Average debt of graduates'].value;
+            var stateDebtPer = Math.round(json['Percent of graduates with debt'].value * 100) + "%";
+            var stateTui = '$ ' + json['Tuition and fees (in-district/in-state)'].value;
             var stateName = json['name'].value + ' (' + json['State (FIPS code)'].value  + ')';
 
             var data = {
@@ -107,27 +114,39 @@ function initialize() {
             // Add Public Institutions to layer
             update_layer('rmstate');
 
+            // If zoom is as fine as 6 for the first time create new Marker Cluster
             if (count < 1) {
-                setMarkerData('public');
-                setMarkerData('private');
+                //setMarkerData('public');
+                //setMarkerData('private');
+                var mcOptions = {gridSize: 40, maxZoom: 13};
+                markercluster = new MarkerClusterer(map,markersArray,mcOptions);
                 count++;
-            } else {
-                showMarkers();
+            }else { // Refresh the cluster
+                //showMarkers();
+                //console.log("Array has: " + markersArray.length);
+                markercluster.resetViewport();
             }
+
+            //console.log("Array has: " + markersArray.length);
 
             // Add Private Institutions  to layer 2
             //update_layer('private');
             updateLegend();
 
         } else {
+            // Reset Zoom count
+            count = 0;
 
-            clearMarkers();
+            //clearMarkers();
+
+            // Clear Marker Clusters
+            markercluster.clearMarkers();
 
             // Re-Display State Layer AND Remove Public Institution Layer
             update_layer('state');
 
             // Removes Private Institutions layer
-            update_layer(null);
+            //update_layer(null);
             updateLegend('State Ranking of Student Debt');
             
         }
@@ -167,7 +186,8 @@ function update_layer(type){
                     select: 'geometry',
                     from: '1Msy4KUWg3WxqPhu5ynM8D99ivh5rrqyHGWU4T4o',
                     where: "Year = '" + year + "'"
-                }
+                },
+                suppressInfoWindows: true
             });
             break;
         }
@@ -363,6 +383,10 @@ function drawNationVisualization(year) {
 
 }
 
+/*
+ *    Gets data from fusion table and creates an array of markers
+ *    @param type - They type of data to query for.
+ */
 function setMarkerData(type){
 
     var tableId = (type == 'public') ? "17hyJhTdWctFwnS6wZBZAcFostEd3KPMmBVl9IV8" : "1dQB9NiJJgew8kJb7zMTOMgyL8cOHW2sOI2x6nCc";
@@ -376,7 +400,7 @@ function setMarkerData(type){
 
     var createMarker = function(coordinate, name, p_year, percent, avg, enrollment, url) {
         var marker = new google.maps.Marker({
-            map: map,
+            //map: map,
             position: coordinate,
             icon: new google.maps.MarkerImage(url)
         });
@@ -412,10 +436,14 @@ function setMarkerData(type){
 
             createMarker(coordinate, name, curr_year, perc, avg_debt, enroll, url);
         }
+
     });
+
 }
 
-
+/*
+ *    Hides Markers from map
+ */
 function clearMarkers() {
     if (markersArray) {
         for(ndx in markersArray){
@@ -424,6 +452,9 @@ function clearMarkers() {
     }
 }
 
+/*
+ *    Show markers on the map in Marker Array if it exists
+ */
 function showMarkers() {
     if (markersArray) {
         for (i in markersArray) {
@@ -432,6 +463,9 @@ function showMarkers() {
     }
 }
 
+/*
+*    Clears Markers from map and Empty the Marker Array
+*/
 function deleteMarkers() {
     if (markersArray) {
         for (i in markersArray) {
