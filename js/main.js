@@ -68,28 +68,30 @@ function initialize() {
     createLegend(map, 'State Ranking of Student Debt');
 
     google.maps.event.addListener(layer, 'click', function(e) {
-            var stateList = '';
             var json = e.row;
 
             var stateDebtAvg = json['Average debt of graduates'].value;
-            var stateDebtPer = json['Percent of graduates with debt'].value;
-            var stateTui = json['Tuition and fees (in-district/in-state)'].value;
-            var stateName = json['name'].value + ' (' + json['State (FIPS code)'].value  + ')';
+            stateDebtAvg = (stateDebtAvg !== 'N/A') ? '$' + stateDebtAvg : stateDebtAvg;
 
-            var data = {
-                name: stateName,
-                debtAvg: stateDebtAvg,
-                debtPer: stateDebtPer,
-                tuition: stateTui
-            };
+            var stateDebtPer = json['Percent of graduates with debt'].value ;
+            stateDebtPer = (stateDebtPer !== 'N/A') ? (stateDebtPer* 100).toPrecision(2) + '%' : stateDebtPer;
 
-            $.each(data, function(i,itm){
-                console.log(i + ' ' + itm);
-                stateList += "<li class ='"+ i +"'>" + itm + "</li>";
-            });
+            var stateYear = json['Year'].value;
+            var stateTui = '$' + json['Tuition and fees (in-district/in-state)'].value;
+            var stateName = json.name.value;
 
-            $('#stateData').html('').append(stateList);
-       // drawVisualization(state);
+            $('#stName').text(stateName);
+            $('#stAvg').text(stateDebtAvg);
+            $('#stPer').text(stateDebtPer);
+            $('#stTui').text(stateTui);
+            $('#stYear').text(stateYear);
+
+            var stateDetails = $('#stateInformation');
+            if (stateDetails.is(":hidden")) {
+                stateDetails.slideDown("slow");
+            }
+
+            //drawVisualization(state);
     });
 
     // Setup markers
@@ -100,6 +102,7 @@ function initialize() {
 
         var statezoom = 6;
         var zoomLevel = map.getZoom();
+        var stateDetails = $('#stateInformation');
 
         // When zoom is finer than 6 get institutions
         if (zoomLevel >= statezoom) {
@@ -118,6 +121,7 @@ function initialize() {
             // Add Private Institutions  to layer 2
             //update_layer('private');
             updateLegend();
+            stateDetails.slideUp();
 
         } else {
 
@@ -194,6 +198,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
 $(function() {
     var sliderLabels = $('#sliderLabels');
     var timearr = new Array("2003-04","2004-05","2005-06","2006-07","2007-08","2008-09","2009-10","2010-11");
+
     $("#slider").slider({
         value:7,
         min: 0,
@@ -213,6 +218,8 @@ $(function() {
                 setMarkerData('public');
                 setMarkerData('private');
             }
+
+
         }
     });
 });
@@ -236,10 +243,26 @@ var LAYER_STYLES = {
 };
 
 function createNationCharts(map, year){
-    var nationCharts = document.getElementById('nationCharts');
+
+    if (document.getElementById('nationCharts')) {
+        var oldCharts = document.getElementById('nationCharts');
+        oldCharts.parentNode.removeChild(oldCharts);
+    }
+    var nationCharts = document.createElement('div');
+    nationCharts.id = 'nationCharts';
     nationCharts.index = 1;
+
+    var nation_debt_avg = document.createElement('div');
+    nation_debt_avg.id = 'nation_debt_avg';
+
+    var nation_debt_percent = document.createElement('div');
+    nation_debt_percent.id = 'nation_debt_percent';
+
+    nationCharts.appendChild(nation_debt_avg);
+    nationCharts.appendChild(nation_debt_percent);
+
     map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(nationCharts);
-    drawNationVisualization(year);
+    //drawNationVisualization(year);
 }
 
 /**

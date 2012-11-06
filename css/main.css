@@ -114,6 +114,7 @@ textarea {
     height: 70px;
     z-index: 99;
     position: relative;
+    display: none;
 }
 #map_canvas {
     margin: 0;
@@ -189,17 +190,31 @@ textarea {
 }
 
 /********State Details info ***********/
-ul#stateData {
-    list-style: none;
+#stateData {
     padding: 0;
+    clear: both;
 }
 
-#stateData li {
+#stateData div:first-child {
+    width: 150px;
+}
+
+
+#stateData div {
     float: left;
-    width: 160px;
     padding: 15px;
     text-align: left;
     border-right: 1px solid #CCC;
+}
+
+#stName {
+    color: #045A8D;
+}
+
+.stDetails {
+    font-size: .8em;
+    display: block;
+    color: #999;
 }
 
 
@@ -229,7 +244,6 @@ ul#sliderLabels  {
 }
 
 #slider .ui-slider-handle {
-
     background: #045A8D no-repeat center top;
     width: 14px;
     height: 25px;
