@@ -51,7 +51,7 @@ function initialize() {
     layer = new google.maps.FusionTablesLayer({
         query: {
             select: 'geometry',
-            from: '1Msy4KUWg3WxqPhu5ynM8D99ivh5rrqyHGWU4T4o',
+            from: '1F9sMc6ZkLQ_YqEBtjiIWNyOsMFO8DKjm9FUqho0',
             where: "Year = '" + year + "'"
         }
     });
@@ -169,7 +169,7 @@ function update_layer(type){
             layer.setOptions({
                 query: {
                     select: 'geometry',
-                    from: '1Msy4KUWg3WxqPhu5ynM8D99ivh5rrqyHGWU4T4o',
+                    from: '1F9sMc6ZkLQ_YqEBtjiIWNyOsMFO8DKjm9FUqho0',
                     where: "Year = '" + year + "'"
                 }
             });
