@@ -187,6 +187,22 @@ textarea {
 #mapHeader #sliderContainer {
     float: right;
 }
+
+/********State Details info ***********/
+ul#stateData {
+    list-style: none;
+    padding: 0;
+}
+
+#stateData li {
+    float: left;
+    width: 160px;
+    padding: 15px;
+    text-align: left;
+    border-right: 1px solid #CCC;
+}
+
+
 /********* SLIDER *****/
 
 ul#sliderLabels  {

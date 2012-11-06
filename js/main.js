@@ -68,9 +68,30 @@ function initialize() {
     createLegend(map, 'State Ranking of Student Debt');
 
     google.maps.event.addListener(layer, 'click', function(e) {
-        console.dir(e);
-       // var state = e.row.id.value;
+        var stateList = '';
+        var json = e.row;
+
+        var stateDebtAvg = json['Average debt of graduates'].value;
+        var stateDebtPer = json['Percent of graduates with debt'].value;
+        var stateTui = json['Tuition and fees (in-district/in-state)'].value;
+        var stateName = json['name'].value + ' (' + json['State (FIPS code)'].value  + ')';
+
+        var data = {
+            name: stateName,
+            debtAvg: stateDebtAvg,
+            debtPer: stateDebtPer,
+            tuition: stateTui
+        };
+
+        $.each(data, function(i,itm){
+            console.log(i + ' ' + itm);
+            stateList += "<li class ='"+ i +"'>" + itm + "</li>";
+        });
+
+        $('#stateData').html('').append(stateList);
+        // var state = e.row.id.value;
        // drawVisualization(state);
+
     });
 
     // Setup markers
@@ -187,7 +208,7 @@ $(function() {
             createNationCharts(map,year);
 
             //clear and display the new year's layer
-            layer = update_layer('state');
+            update_layer('state');
 
             if(map.getZoom() >= 6) {
                 deleteMarkers();
@@ -221,6 +242,22 @@ function createNationCharts(map, year){
     nationCharts.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(nationCharts);
     drawNationVisualization(year);
+}
+
+function nationContent(){
+    var nationCharts = document.createElement('div');
+    nationCharts.id = 'nationCharts';
+    nationCharts.index = 1;
+
+    var nation_debt_avg = document.createElement('div');
+    nation_debt_avg.id = 'nation_debt_avg';
+
+    var nation_debt_percent = document.createElement('div');
+    nation_debt_percent.id = 'nation_debt_percent';
+
+    nationCharts.appendChild(nation_debt_avg);
+    nationCharts.appendChild(nation_debt_percent);
+
 }
 
 /**
