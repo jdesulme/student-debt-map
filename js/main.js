@@ -187,7 +187,7 @@ $(function() {
             createNationCharts(map,year);
 
             //clear and display the new year's layer
-            layer = update_layer('state');
+            update_layer('state');
 
             if(map.getZoom() >= 6) {
                 deleteMarkers();
@@ -361,9 +361,13 @@ function setMarkerData(type){
             position: coordinate,
             icon: new google.maps.MarkerImage(url)
         });
-        google.maps.event.addListener(marker, 'mouseover', function(event) {
+
+        var placemarkInfo = name + '<br>' + p_year.getFullYear() + '<br>Average Debt: $' + avg + '<br>Graduate % with Debt: ' +
+            (percent *100) + '%<br>Total Enrollment: ' + enrollment;
+
+        google.maps.event.addListener(marker, 'click', function(event) {
             infoWindow.setPosition(coordinate);
-            infoWindow.setContent(name + '<br>' + p_year );
+            infoWindow.setContent(placemarkInfo);
             infoWindow.open(map);
         });
 
