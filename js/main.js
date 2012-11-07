@@ -68,7 +68,7 @@ function initialize() {
 
     layer_2.setMap(map);
 
-    createLegend(map, 'State Ranking of Student Debt');
+    createLegend(map, 'Average Debt of Graduates');
 
     // Initialize Markers
     setMarkerData('public');
@@ -78,13 +78,15 @@ function initialize() {
             var json = e.row;
 
             var stateDebtAvg = json['Average debt of graduates'].value;
-            stateDebtAvg = (stateDebtAvg !== 'N/A') ? '$' + stateDebtAvg : stateDebtAvg;
+            stateDebtAvg = (stateDebtAvg !== 'N/A') ? addCommas(stateDebtAvg.toString()) : stateDebtAvg;
 
             var stateDebtPer = json['Percent of graduates with debt'].value ;
             stateDebtPer = (stateDebtPer !== 'N/A') ? (stateDebtPer* 100).toPrecision(2) + '%' : stateDebtPer;
 
             var stateYear = json['Year'].value;
-            var stateTui = '$' + json['Tuition and fees (in-district/in-state)'].value;
+            var stateTui = json['Tuition and fees (in-district/in-state)'].value;
+            stateTui = (stateTui !== 'N/A') ? addCommas(stateTui) : stateTui;
+
             var stateName = json.name.value;
 
             $('#stName').text(stateName);
@@ -132,7 +134,7 @@ function initialize() {
 
             // Add Private Institutions  to layer 2
             //update_layer('private');
-            updateLegend();
+            updateLegend(null,'NY');
             stateDetails.slideUp();
 
         } else {
@@ -149,7 +151,7 @@ function initialize() {
 
             // Removes Private Institutions layer
             //update_layer(null);
-            updateLegend('State Ranking of Student Debt');
+            updateLegend('Average Debt of Graduates','state');
             
         }
     });
@@ -236,8 +238,6 @@ $(function() {
                 setMarkerData('public');
                 setMarkerData('private');
             }
-
-
         }
     });
 });
@@ -247,17 +247,33 @@ $(function() {
  * @type {Object}
  */
 var LAYER_STYLES = {
-    'State Ranking of Student Debt': {
-        'min': 0,
-        'max': 50,
-        'colors': [
-            '#045a8d',
-            '#2b8cbe',
-            '#a6bddb',
-            '#a6bddb',
-            '#d0d1e6'
-        ]
-    }
+    'Average Debt of Graduates': [
+        {
+            'min': 10000,
+            'max': 15000,
+            'color': '#D0D1E6'
+        },
+        {
+            'min': 15000,
+            'max': 17500,
+            'color': '#A6BDDB'
+        },
+        {
+            'min': 17500,
+            'max': 20000,
+            'color': '#74A9CF'
+        },
+        {
+            'min': 20000,
+            'max': 23000,
+            'color': '#2B8CBE'
+        },
+        {
+            'min': 23000,
+            'max': 50000,
+            'color': '#045A8D'
+        }
+    ]
 };
 
 function createNationCharts(map, year){
@@ -296,32 +312,28 @@ function createLegend(map, sector) {
     legendStateContent(legendWrapper, sector);
 }
 
+// Generate the content for the legend
 function legendStateContent(legendWrapper, sector) {
     var legend = document.createElement('div');
     legend.id = 'legend';
 
-    var title = document.createElement('p');
+    var title = document.createElement('h3');
     title.innerHTML = sector;
     legend.appendChild(title);
 
-    var layerStyle = LAYER_STYLES[sector];
-    var colors = layerStyle.colors;
-    var minNum = layerStyle.min;
-    var maxNum = layerStyle.max;
-    var step = (maxNum - minNum) / colors.length;
+    var columnStyle = LAYER_STYLES[sector];
+    for (var i in columnStyle) {
+        var style = columnStyle[i];
 
-    for (var i = 0; i < colors.length; i++) {
         var legendItem = document.createElement('div');
 
-        var color = document.createElement('div');
+        var color = document.createElement('span');
         color.setAttribute('class', 'color');
-        color.style.backgroundColor = colors[i];
+        color.style.backgroundColor = style.color;
         legendItem.appendChild(color);
 
-        var newMin = minNum + step * i;
-        var newMax = newMin + step;
         var minMax = document.createElement('span');
-        minMax.innerHTML = newMin + ' - ' + newMax;
+        minMax.innerHTML = addCommas(style.min) + ' - ' + addCommas(style.max);
         legendItem.appendChild(minMax);
 
         legend.appendChild(legendItem);
@@ -330,13 +342,33 @@ function legendStateContent(legendWrapper, sector) {
     legendWrapper.appendChild(legend);
 }
 
-function updateLegend(sector) {
+function legendNYMarkers(legendWrapper){
+    // Create the legend and display on the map
+    var legend = document.createElement('div');
+    legend.id = 'legend';
+
+    var content = [];
+    content.push('<h3>Institution Markers</h3>');
+    content.push('<p><div class="mkDisplay mkPrivateBach"></div>Private 4 year schools</p>');
+    content.push('<p><div class="mkDisplay mkPrivateAssc"></div>Private 2 year schools</p>');
+    content.push('<p><div class="mkDisplay mkPrivate"></div>Private less than 2 year schools</p>');
+    content.push('<p><div class="mkDisplay mkPublicBach"></div>Public 4 year schools</p>');
+    content.push('<p><div class="mkDisplay mkPublicAssc"></div>Public 2 year schools</p>');
+    content.push('<p><div class="mkDisplay mkPublic"></div>Public less than 2 year schools</p>');
+    legend.innerHTML = content.join('');
+    legendWrapper.appendChild(legend);
+}
+
+// Update the legend content
+function updateLegend(sector,type) {
     var legendWrapper = document.getElementById('legendWrapper');
     var legend = document.getElementById('legend');
     legendWrapper.removeChild(legend);
 
-    if (sector) {
+    if (type === 'state'){
         legendStateContent(legendWrapper, sector);
+    } else if (type === 'NY'){
+        legendNYMarkers(legendWrapper);
     }
 }
 
@@ -426,7 +458,7 @@ function setMarkerData(type){
             icon: new google.maps.MarkerImage(url)
         });
 
-        var placemarkInfo = name + '<br>' + p_year.getFullYear() + '<br>Average Debt: $' + avg + '<br>Graduate % with Debt: ' +
+        var placemarkInfo = name + '<br>' + p_year.getFullYear() + '<br>Average Debt: ' + currency('$',avg) + '<br>Graduate % with Debt: ' +
             (percent *100) + '%<br>Total Enrollment: ' + enrollment;
 
         google.maps.event.addListener(marker, 'click', function(event) {
@@ -493,4 +525,31 @@ function deleteMarkers() {
         }
         markersArray.length = 0;
     }
+}
+
+/**
+ * Converts a string to currency
+ * @author http://chris.carline.org/
+ * @param sSymbol
+ * @param vValue
+ * @return {String}
+ * @constructor
+ */
+function currency(sSymbol, vValue) {
+    aDigits = vValue.toFixed(2).split(".");
+    aDigits[0] = aDigits[0].split("").reverse().join("").replace(/(\d{3})(?=\d)/g, "$1,").split("").reverse().join("");
+    return sSymbol + aDigits.join(".");
+}
+
+function addCommas(nStr)
+{
+    nStr += '';
+    x = nStr.split('.');
+    x1 = x[0];
+    x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+    }
+    return '$'+ x1 + x2;
 }

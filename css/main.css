@@ -130,7 +130,6 @@ textarea {
     background: #FFF;
     margin: 10px;
     padding: 5px;
-    width: 150px;
 }
 
 #legend p {
@@ -199,6 +198,9 @@ textarea {
     width: 150px;
 }
 
+#stateData div:last-child {
+    border-right: none;
+}
 
 #stateData div {
     float: left;
@@ -255,6 +257,44 @@ ul#sliderLabels  {
     cursor: pointer;
 }
 
+/* ==========================================================================
+   Marker Images
+   ========================================================================== */
+#legend div.mkDisplay {
+    display: block;
+    width: 25px;
+    float: left;
+    padding-right: 15px;
+}
+
+.mkDisplay {
+    background-repeat: no-repeat;
+    height: 33px;
+}
+
+.mkPublicBach {
+    background-image: url("../img/yellow_bach_university.png");
+}
+
+.mkPublicAssc {
+    background-image: url("../img/yellow_assc_university.png");
+}
+
+.mkPublic {
+    background-image: url("../img/yellow_university.png");
+}
+
+.mkPrivateBach {
+    background-image: url("../img/orange_bach_university.png");
+}
+
+.mkPrivateAssc {
+    background-image: url("../img/orange_assc_university.png");
+}
+
+.mkPrivate {
+    background-image: url("../img/orange_university.png");
+}
 
 /* ==========================================================================
    Helper classes
