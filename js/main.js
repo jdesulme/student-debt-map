@@ -458,8 +458,8 @@ function setMarkerData(type){
             icon: new google.maps.MarkerImage(url)
         });
 
-        var placemarkInfo = name + '<br>' + p_year.getFullYear() + '<br>Average Debt: ' + currency('$',avg) + '<br>Graduate % with Debt: ' +
-            (percent *100) + '%<br>Total Enrollment: ' + enrollment;
+        var placemarkInfo = name + '<br>' + p_year + '<br>Average Debt: ' + currency('$',avg) + '<br>Graduate % with Debt: ' +
+            (percent *100).toPrecision(2) + '%<br>Total Enrollment: ' + enrollment;
 
         google.maps.event.addListener(marker, 'click', function(event) {
             infoWindow.setPosition(coordinate);
